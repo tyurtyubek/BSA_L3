@@ -206,8 +206,8 @@ namespace BSA_2
         {
             var minmaxhealth = _animals.Select(par => new
                 {
-                    Max = _animals.OrderBy(p => p.HealthPoints).First(),
-                    Min = _animals.OrderBy(p => p.HealthPoints).Last()
+                    Max = _animals.Where(a => a.AnimalCondition != State.dead).OrderBy(p => p.HealthPoints).First(),
+                    Min = _animals.Where(a => a.AnimalCondition != State.dead).OrderBy(p => p.HealthPoints).Last()
                 })
                 .First();
 
