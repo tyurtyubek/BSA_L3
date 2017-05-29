@@ -13,12 +13,12 @@ namespace BSA_2
         {
             _animals = new List<IAnimal>();
             _animals.Add(new Lion("KingLion"));
-            _animals.Add(new Lion("KingLion2") { AnimalCondition= State.dead});
-            _animals.Add(new Tiger("Tigrenok") { AnimalCondition=State.sick});
+            _animals.Add(new Lion("KingLion2") { AnimalCondition = State.dead, HealthPoints = 0 });
+            _animals.Add(new Tiger("Tigrenok") { AnimalCondition = State.sick });
             _animals.Add(new Tiger("Tigrenok2") { AnimalCondition = State.sick });
             _animals.Add(new Tiger("Tigrenok3"));
-            _animals.Add(new Elephant("Bony") { AnimalCondition = State.dead });
-            _animals.Add(new Elephant("Bony2") { AnimalCondition = State.dead });
+            _animals.Add(new Elephant("Bony") { AnimalCondition = State.dead, HealthPoints = 0 });
+            _animals.Add(new Elephant("Bony2") { AnimalCondition = State.dead , HealthPoints = 0 });
             _animals.Add(new Bear("Balu"));
             _animals.Add(new Fox("McFoxy"));
             _animals.Add(new Bear("Balu2"));
@@ -94,15 +94,14 @@ namespace BSA_2
 
         public int CountAnimals { get { return _animals.Count(); } }
 
-
-        #region Query ShowGroupByTypeOfAnimal 
-
         public void ShowGroupByTypeOfAnimal()
         {
             var animalbytype = _animals.GroupBy(animal => animal.GetType().Name)
                                        .Select(animal => new
-                                       {  AnimalType = animal.Key,
-                                          AnimalName = animal.Select(s => s) });
+                                       {
+                                           AnimalType = animal.Key,
+                                           AnimalName = animal.Select(s => s)
+                                       });
             foreach (var elem in animalbytype)
             {
                 Console.WriteLine($"Animals grouped by {elem.AnimalType}: ");
@@ -112,70 +111,48 @@ namespace BSA_2
                 }
             }
         }
-        #endregion
-        
-        #region Query GroupByDefinedState 
 
         public void ShowAnimalByState(State state)
         {
-            var animalsbystate = _animals.Where(a => a.AnimalCondition == state).Select(a => 
-            new
+            var animalsByState = _animals.Where(a => a.AnimalCondition == state);
+            foreach (var elem in animalsByState)
             {
-                AnimalName = a.Name,
-                AnimalType = a.GetType().Name,
-                AnimalState = a.AnimalCondition
-            });
-            foreach (var elem in animalsbystate)
-            {
-                Console.WriteLine(elem.AnimalName + " " + elem.AnimalType + " " + elem.AnimalState );
+                Console.WriteLine(elem.Name + " " + elem.GetType().Name + " " + elem.AnimalCondition);
             }
         }
-        #endregion
-        
-        #region Query ShowAllSickTigers
 
         public void ShowAllSickTigers()
         {
-            var sicktigers = _animals.Where(animal => animal.GetType().Name == "Tiger").Where(animal => animal.AnimalCondition == State.sick).Select( animal => new { AnimalName = animal.Name, AnymalType=animal.GetType().Name});
-
+            var sicktigers = _animals
+                .Where(animal => animal.GetType().Name == "Tiger" && animal.AnimalCondition == State.sick);
             foreach (var item in sicktigers)
             {
-                Console.WriteLine($"{item.AnimalName} {item.AnymalType} is sick now");
+                Console.WriteLine($"{item.Name} {item.GetType().Name} is sick now");
             }
         }
-
-        #endregion
-        
-        #region Query ShowElephantByName
 
         public void ShowElephantByName(string name)
         {
             string elephantbyname = "";
-            var elephants = _animals.Where(animal => animal.GetType().Name == "Elephant").Where(animal => animal.Name == name);
+            var elephants = _animals.Where(animal => animal.GetType().Name == "Elephant" && animal.Name == name);
             foreach (var item in elephants)
             {
                 if (elephants.Count() == 1)
-                Console.WriteLine($"There is one Elephant with name {item.Name}");
+                    Console.WriteLine($"There is one Elephant with name {item.Name}");
                 else elephantbyname = " " + item.Name;
             }
             if (elephants.Count() > 1)
                 Console.WriteLine($"There are {elephants.Count()} elephants wih names:{elephantbyname}");
         }
-        #endregion
-        
-        #region Query ShowAllHungryAnimalNames
 
-        public void ShowAllHungryAnimalNames ()
+        public void ShowAllHungryAnimalNames()
         {
-            var hungryanimals = _animals.Where(anymal => anymal.AnimalCondition == State.hungry).Select(anymal => new {AnymalName = anymal.Name});
-            foreach (var item in hungryanimals)
+            var hungryAnimals = _animals.Where(anymal => anymal.AnimalCondition == State.hungry);
+            foreach (var item in hungryAnimals)
             {
-                Console.WriteLine(item.AnymalName);
-            }          
+                Console.WriteLine(item.Name);
+            }
         }
-        #endregion
-        
-        #region Query ShowHealthiestByTypeAnimals
 
         public void ShowHealthiestByTypeAnimals()
         {
@@ -188,65 +165,60 @@ namespace BSA_2
                 });
             foreach (var element in healthiestanimals)
             {
-                Console.WriteLine(element.Animals.GetType().Name +" "+ element.Animals.Name + " " + element.Animals.HealthPoints);
+                Console.WriteLine(element.Animals.GetType().Name + " " + element.Animals.Name + " " + element.Animals.HealthPoints);
             }
         }
-        #endregion
-        
-        #region Query ShowNumerOfDeadAnimals
 
         public void ShowNumerOfDeadAnimalsByType()
         {
-            var nuberdeadanimals = _animals.Where(par => par.AnimalCondition == State.dead)
-                                            .GroupBy(par => par.GetType().Name)
+            var nuberdeadanimals = _animals.Where(param => param.AnimalCondition == State.dead)
+                                            .GroupBy(param => param.GetType().Name)
                                             .Select(a => new
                                             {
                                                 AnimalType = a.Key,
-                                                DeadAnimals= a.Count(b=>b.AnimalCondition==State.dead)
+                                                DeadAnimals = a.Count(b => b.AnimalCondition == State.dead)
                                             });
             foreach (var animal in nuberdeadanimals)
             {
                 Console.WriteLine($"Dead {animal.AnimalType} in numer of {animal.DeadAnimals}");
             }
         }
-        #endregion
-        
-        #region Query ShowAllWolfesAndBearsHealthMoreThan3
+
         public void ShowAllWolfesAndBearsHealthMoreThan3()
         {
-            var healthmore3 = _animals.Where(par => par.HealthPoints > 3)
-                                      .Where(par => par.GetType().Name == "Bear" || par.GetType().Name == "Wolf")
-                                      .Select(par => new { AnimalName = par.Name, AnimalType = par.GetType().Name, AnimalHealth = par.HealthPoints });
-              
+            var healthmore3 = _animals.Where(param => param.HealthPoints > 3)
+                                      .Where(param => param.GetType().Name == "Bear" || param.GetType().Name == "Wolf")
+                                      .Select(param => new
+                                      {
+                                          AnimalName = param.Name,
+                                          AnimalType = param.GetType().Name,
+                                          AnimalHealth = param.HealthPoints
+                                      });
 
             foreach (var item in healthmore3)
             {
                 Console.WriteLine(item.AnimalType + " " + item.AnimalName + " " + item.AnimalHealth);
             }
-                                      
+
         }
-        #endregion
-        
-        #region Query AnimalsWIthMinAndMaxHealth
+
         public void AnimalsWIthMinAndMaxHealth()
         {
             var minmaxhealth = _animals.Select(par => new
-            {
-                Max = _animals.OrderBy(p=>p.HealthPoints).First(),
-                Min = _animals.OrderBy(p => p.HealthPoints).Last()
-            }).First();
+                {
+                    Max = _animals.OrderBy(p => p.HealthPoints).First(),
+                    Min = _animals.OrderBy(p => p.HealthPoints).Last()
+                })
+                .First();
 
-                Console.WriteLine(minmaxhealth.Max.GetType().Name + " " + minmaxhealth.Max.Name + " " + minmaxhealth.Max.HealthPoints);
-                Console.WriteLine(minmaxhealth.Min.GetType().Name + " " + minmaxhealth.Min.Name + " " + minmaxhealth.Min.HealthPoints);
+            Console.WriteLine(minmaxhealth.Max.GetType().Name + " " + minmaxhealth.Max.Name + " " + minmaxhealth.Max.HealthPoints);
+            Console.WriteLine(minmaxhealth.Min.GetType().Name + " " + minmaxhealth.Min.Name + " " + minmaxhealth.Min.HealthPoints);
         }
-        #endregion
-        
-        #region Query AverageHealthInAnimals
+
         public void AverageHealthInAnimals()
         {
             var avg = _animals.Average(par => par.HealthPoints);
             Console.WriteLine("Average healthpoints in the zoo are {0}", avg);
         }
-        #endregion
     }
 }
